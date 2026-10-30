@@ -89,11 +89,11 @@ class CROTests(unittest.TestCase):
         self.assertEqual(IDS['bonus'].attrs['aria-labelledby'], 'bonus-title')
         self.assertNotIn('R$', IDS['bonus'].text)
 
-    def test_neutral_heading_does_not_invent_bonus_or_deadline(self):
+    def test_confirmed_live_bonus_does_not_invent_a_deadline(self):
         headings = [e for e in IDS['bonus'].descendants() if e.tag == 'h2']
-        self.assertEqual([e.text for e in headings], ['Conheça os materiais da oferta'])
+        self.assertEqual([e.text for e in headings], ['Garanta agora seu acesso e receba a live como bônus'])
         self.assertFalse(any(e.has_class('eyebrow') for e in IDS['bonus'].descendants()))
-        self.assertIn('Não são bônus e não estão incluídos nos planos.', IDS['bonus'].text)
+        self.assertIn('lives gravadas já apresentado no módulo 11 do Plano Completo', IDS['bonus'].text)
         self.assertNotIn('válidos somente até', HTML)
         self.assertNotIn('DATA_ATUAL', HTML)
 
@@ -103,7 +103,19 @@ class CROTests(unittest.TestCase):
             ('completo', 'QUERO O PLANO COMPLETO →'),
             ('essencial', 'QUERO O PLANO ESSENCIAL →'),
         ])
-        self.assertIn("const CHECKOUT_URLS = { completo: '', essencial: '' };", HTML)
+        self.assertIn("completo: 'https://pay.cakto.com.br/pc7bv5d_1261231'", HTML)
+        self.assertIn("essencial: 'https://pay.cakto.com.br/35b52pn'", HTML)
+
+    def test_confirmed_prices_and_service_fees_are_visible_in_each_plan(self):
+        for class_name, price, total in [('plan-full', 'R$ 27,90', 'R$ 28,89'), ('plan-basic', 'R$ 9,90', 'R$ 10,89')]:
+            plan = next(e for e in ELEMENTS if e.has_class(class_name))
+            price_element = next(e for e in plan.descendants() if e.has_class('plan-price'))
+            fee = next(e for e in plan.descendants() if e.has_class('checkout-fee'))
+            self.assertIn(price, price_element.text)
+            self.assertIn('R$ 0,99', fee.text)
+            self.assertIn(total, fee.text)
+        self.assertNotIn('R$ 12,90', HTML)
+        self.assertNotIn('Os valores são de teste', HTML)
 
     def test_smooth_scroll_has_reduced_motion_fallback(self):
         self.assertIn('html{scroll-behavior:smooth}', HTML)

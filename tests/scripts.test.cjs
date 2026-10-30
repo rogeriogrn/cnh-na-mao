@@ -25,6 +25,8 @@ const context = vm.createContext({ URL, URLSearchParams, window: { location: { a
   getElementById: id => ({ 'proof-track': track, 'proof-prev': previous, 'proof-next': next })[id],
 } });
 vm.runInContext(main, context);
+// Simulate missing configuration to verify the fallback without real navigation.
+vm.runInContext("CHECKOUT_URLS.completo = ''; CHECKOUT_URLS.essencial = ''", context);
 let count = 0;
 for (const index of [0, 1, 0, 0]) {
   buttons[index].listeners.click();

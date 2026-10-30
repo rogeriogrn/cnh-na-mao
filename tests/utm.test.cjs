@@ -74,12 +74,24 @@ test('repeated URL construction does not duplicate parameters', () => {
   const once = build(base, '?utm_source=FB&utm_campaign=launch');
   assert.equal(build(once, '?utm_source=FB&utm_campaign=launch'), once);
 });
-test('checkout configuration remains empty and clicks still show preparation notice', () => {
-  assert.equal(vm.runInContext('CHECKOUT_URLS.completo', context), '');
-  assert.equal(vm.runInContext('CHECKOUT_URLS.essencial', context), '');
-  window.location.search = '?utm_source=FB';
+test('confirmed checkout mappings receive UTMs without real network calls', () => {
+  const expected = ['https://pay.cakto.com.br/pc7bv5d_1261231', 'https://pay.cakto.com.br/35b52pn'];
+  assert.equal(vm.runInContext('CHECKOUT_URLS.completo', context), expected[0]);
+  assert.equal(vm.runInContext('CHECKOUT_URLS.essencial', context), expected[1]);
+  window.location.search = '?utm_source=FB&utm_campaign=Confirmado%7C123';
+  for (const index of [0, 1]) {
+    buttons[index].listeners.click();
+    const actual = new URL(redirects.at(-1));
+    assert.equal(actual.origin + actual.pathname, expected[index]);
+    assert.equal(actual.searchParams.get('utm_source'), 'FB');
+    assert.equal(actual.searchParams.get('utm_campaign'), 'Confirmado|123');
+  }
+});
+test('missing checkout configuration still shows a preparation notice', () => {
+  vm.runInContext("CHECKOUT_URLS.completo = ''", context);
+  const before = redirects.length;
   buttons[0].listeners.click();
-  assert.equal(redirects.length, 0);
+  assert.equal(redirects.length, before);
   assert.equal(pending[0].hidden, false);
 });
 test('both purchase paths use current query only when a link is explicitly configured', () => {

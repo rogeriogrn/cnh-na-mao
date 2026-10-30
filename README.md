@@ -11,9 +11,14 @@ Página responsiva em HTML, CSS e JavaScript, sem instalação ou etapa de compi
 
 ## Como configurar os botões de checkout
 
-Abra index.html e procure por CHECKOUT_URLS. Substitua cada string vazia pelo link HTTPS correto de cada oferta, mantendo as aspas:
+Os links foram confirmados pelo responsável e já estão configurados em `CHECKOUT_URLS`:
 
-    const CHECKOUT_URLS = { completo: 'LINK_DO_CHECKOUT_COMPLETO', essencial: 'LINK_DO_CHECKOUT_ESSENCIAL' };
+    const CHECKOUT_URLS = { completo: 'https://pay.cakto.com.br/pc7bv5d_1261231', essencial: 'https://pay.cakto.com.br/35b52pn' };
+
+- Plano Completo: R$ 27,90 + taxa de serviço Cakto de R$ 0,99 = R$ 28,89.
+- Opção Essencial: R$ 9,90 + taxa de serviço Cakto de R$ 0,99 = R$ 10,89.
+
+Esses valores foram conferidos no checkout; a taxa e o total aparecem junto ao preço na página. Confirme novamente os totais se alterar as ofertas na plataforma.
 
 Use somente links reais fornecidos pela sua plataforma. Com o campo vazio, o botão informa que o checkout está em preparação; nenhuma cobrança é realizada. Cadastre os dois e-books opcionais como order bumps na plataforma de checkout. A página não envia escolhas nem processa pagamentos por conta própria. Teste os dois caminhos e os adicionais antes da divulgação.
 
@@ -23,7 +28,7 @@ Use somente links reais fornecidos pela sua plataforma. Com o campo vazio, o bot
 - Confirme a entrega, a compatibilidade, as condições de acesso e a política de reembolso; revise os conteúdos antigos de legislação.
 - Confira a relação e a autorização de uso dos depoimentos, que incluem relatos sobre a Autoescola Futura, não avaliações verificadas do CNH na Mão.
 - Preencha os dados do responsável e os contatos e políticas necessários. A representação da plataforma é ilustrativa e não corresponde a capturas verificadas do produto.
-- Conclua o checkout e faça um teste completo antes de vender.
+- Confira a entrega e as condições na plataforma. Faça um teste autorizado de compra/acesso antes de vender; a verificação realizada não efetuou pagamentos.
 
 ## Estrutura
 
@@ -38,11 +43,11 @@ Use somente links reais fornecidos pela sua plataforma. Com o campo vazio, o bot
 - A âncora `#bonus` fica imediatamente antes de `#oferta`. A rolagem suave é nativa do CSS e respeita a preferência por movimento reduzido; o destino aceita foco por teclado.
 - Os dois botões de contratação dentro dos cards de preço mantêm suas copies e seu comportamento.
 
-### Confirmações comerciais pendentes
+### Bônus confirmado e transparência
 
-O repositório e a copy de referência não identificam bônus gratuitos. Os dois e-books de placas são adicionais pagos separadamente. Por isso, `#bonus` contém provisoriamente um bloco neutro com o título **Conheça os materiais da oferta**, sem anunciar bônus, quantidade ou vencimento não confirmados.
+O responsável confirmou a live como bônus. A seção `#bonus` usa **Garanta agora seu acesso e receba a live como bônus**, sem data de encerramento. O card identifica esse bônus como o conteúdo de lives gravadas já apresentado no módulo 11 do Plano Completo, sem acrescentar sessões, duração, agenda ou acesso ao vivo não confirmados. Não há promessa de inclusão no Essencial. Os dois e-books de placas continuam sendo adicionais pagos separadamente.
 
-Antes de substituir esse título, confirme quais materiais são bônus, em qual plano estão incluídos e se existe prazo real. Não utilize a data do dispositivo como vencimento que se renova diariamente. Se houver uma campanha com prazo verdadeiro, informe uma data de término fixa, o fuso horário e o comportamento após o encerramento.
+O responsável esclareceu que a urgência diária não correspondia a um prazo real. Por isso, não foi implementado vencimento que se renova com a data do dispositivo. Uma eventual campanha futura com prazo verdadeiro deve informar término fixo, fuso e comportamento após o encerramento.
 
 ### Verificações locais
 
@@ -55,9 +60,9 @@ node tests/utm.test.cjs
 git diff --check
 ```
 
-A suíte Python verifica estrutura, posição/copy dos CTAs, âncoras, oferta, imagens, CSS responsivo e preservação do Pixel. A suíte Node valida a sintaxe dos scripts e comportamentos com um DOM mínimo: checkout ainda não configurado, cliques repetidos, URLs válidas/inválidas e carrossel. Esses testes não substituem uma revisão visual em navegador.
+A suíte Python verifica estrutura, posição/copy dos CTAs, âncoras, oferta, imagens, CSS responsivo e preservação do Pixel. A suíte Node valida a sintaxe dos scripts e comportamentos com um DOM mínimo: fallback de checkout vazio/inválido, cliques repetidos, URLs válidas/inválidas e carrossel. Esses testes não substituem uma revisão visual em navegador.
 
-Antes de publicar, valide em desktop e mobile: ausência de CTA na primeira tela, chegada dos três links ao início de `#bonus`, voltar/avançar, navegação por teclado, movimento reduzido, ausência de overflow horizontal e os dois avisos de checkout em preparação. A quantidade exata de telas varia com o dispositivo; o marco da primeira chamada é o término do bloco de apresentação.
+Antes de publicar, valide em desktop e mobile: ausência de CTA na primeira tela, chegada dos três links ao início de `#bonus`, voltar/avançar, navegação por teclado, movimento reduzido, ausência de overflow horizontal e a chegada de cada botão ao checkout correspondente, sem concluir pagamento. Confirme que as UTMs recebidas acompanham o redirecionamento. A quantidade exata de telas varia com o dispositivo; o marco da primeira chamada é o término do bloco de apresentação.
 
 
 ## UTMs e Utmify
@@ -70,7 +75,7 @@ Nos botões de compra, `buildCheckoutUrl` acrescenta somente `utm_source`, `utm_
 - Valores vazios, duplicados, com caracteres de controle, maiores que 1.000 caracteres ou ainda contendo `{{...}}` são ignorados. Espaços, acentos, `&`, `+` e `|` são codificados e preservados.
 - A função nativa não cria cookies nem armazenamento persistente: lê a query atual no momento do clique. A Utmify possui seu próprio comportamento de armazenamento/rastreamento, autorizado separadamente.
 - Os CTAs editoriais continuam sendo âncoras `#bonus`. A versão do script externo inspecionada ignora links com fragmento e não intercepta `location.assign`, utilizado pelos botões de compra. Assim, não há dois decoradores atuando no mesmo redirecionamento.
-- `CHECKOUT_URLS` continua vazio até a identificação comercial dos links. Os exemplos dos testes existem somente no ambiente de teste.
+- `CHECKOUT_URLS` contém os dois links confirmados. Os testes verificam seu mapeamento e simulam redirecionamentos; nenhum teste automatizado envia pedido ou pagamento.
 
 ### Parâmetros no anúncio Meta
 
